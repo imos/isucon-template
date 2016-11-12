@@ -41,7 +41,7 @@ start() {
       --net=host \
       --pid=host \
       --detach \
-      ninecontroller
+      imos/ninecontroller
 }
 
 stop() {

@@ -70,9 +70,23 @@ RUN echo 'DOCKER_API_VERSION="1.23"' >> /etc/environment
 RUN echo '[program:sshd]' > /etc/supervisor/conf.d/sshd.conf
 RUN echo 'command=/usr/sbin/sshd -D -p 2222' >> /etc/supervisor/conf.d/sshd.conf
 
+RUN echo '[program:nined]' > /etc/supervisor/conf.d/nined.conf
+RUN echo 'command=/home/ninetan/init.sh' >> /etc/supervisor/conf.d/nined.conf
+
 CMD /usr/bin/supervisord --nodaemon
 EOM
 sudo docker build --tag imos/ninecontroller /tmp/docker/ninecontroller
+sudo docker rm -f ninecontroller || true
+sudo docker run --privileged \
+    --volume=/var/run/docker.sock:/var/run/docker.sock \
+    --volume=/home/ninetan:/home/ninetan \
+    --name=ninecontroller \
+    --restart=always \
+    --net=host \
+    --pid=host \
+    --detach \
+    imos/ninecontroller
+
 sudo docker save imos/ninecontroller | gzip > ~/ninecontroller.tar.gz
 sudo docker run \
   --volume=$HOME/.config/gcloud:/root/.config/gcloud \
