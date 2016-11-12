@@ -1,5 +1,8 @@
 #!/bin/bash
-# ninecontroller を作成します
+# ninecontroller を自動起動する設定にします
+#
+# Usage:
+#   curl -L 'https://raw.githubusercontent.com/imos/isucon-template/master/install.sh' | bash
 
 set -e -u
 
