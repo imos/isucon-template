@@ -46,14 +46,11 @@ MAINTAINER imos
 
 RUN sed -i -e "s%http://archive.ubuntu.com/ubuntu/%http://ap-northeast-1.ec2.archive.ubuntu.com/ubuntu/%g" /etc/apt/sources.list
 
-# sshd のセットアップ．サーバの指紋を早期に確定するために最初に持ってきている．
-RUN mkdir -p /var/run/sshd
-RUN apt update && apt install --yes openssh-server
-
 # 必要なソフトウェアのインストール
 RUN apt update && apt install --yes \
-    apt-transport-https ca-certificates curl lxc iptables sudo openjdk-8-jdk \
-    unzip git g++-4.9 supervisor
+    aufs-tools cgroupfs-mount apt-transport-https ca-certificates curl lxc \
+    iptables sudo openjdk-8-jdk unzip git g++-4.9 supervisor openssh-server
+RUN mkdir -p /var/run/sshd
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100
 
@@ -63,8 +60,8 @@ RUN useradd --home-dir=/home/ninetan --create-home --uid=10001 --user-group \
 RUN echo 'ninetan ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 
-RUN curl -L -o /root/installer.sh 'https://github.com/bazelbuild/bazel/releases/download/0.4.0/bazel-0.4.0-installer-linux-x86_64.sh'
-RUN bash /root/installer.sh && rm /root/installer.sh
+RUN curl -L -o /root/installer.sh 'https://storage.googleapis.com/imoz-docker-tokyo/bazel/bazel-0.4.0-installer-linux-x86_64.sh' && \
+    bash /root/installer.sh && rm /root/installer.sh
 
 RUN echo '# Bazelrc for GCC' > /etc/bazel.bazelrc
 RUN echo 'build --verbose_failures --copt=-fdiagnostics-color=always --copt=-Wno-cpp --copt=-Wno-unused-local-typedefs --copt=-Wno-sign-compare --copt=-Wno-array-bounds' >> /etc/bazel.bazelrc
