@@ -2,7 +2,7 @@
 # ninecontroller を作成します
 #
 # Usage:
-#   curl -L -o build.sh 'https://git.io/vX6Rn' && bash build.sh
+#   curl -L -o build.sh 'https://git.io/vX6Rn' && time bash build.sh
 
 set -e -u
 
