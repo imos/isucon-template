@@ -23,6 +23,18 @@ curl -L "https://storage.googleapis.com/imoz-docker-tokyo/ninecontroller/${IMAGE
 # 3. ninecontroller の自動起動
 ################################################################################
 
+sudo mkdir -p '/usr/local/ninecontroller'
+if [ ! -f /usr/local/ninecontroller/Dockerfile ]; then
+  cat <<'EOM' | sudo tee '/usr/local/ninecontroller/Dockerfile'
+FROM imos/ninecontroller
+MAINTAINER imos
+
+RUN touch /.foo
+
+CMD /usr/bin/supervisord --nodaemon
+EOM
+fi
+
 cat <<'EOM' | sudo tee /etc/init.d/ninecontroller
 #!/bin/bash
 # ninecontroller用init.dスクリプト
@@ -32,6 +44,7 @@ cat <<'EOM' | sudo tee /etc/init.d/ninecontroller
 # description: Daemon for docker.com
 
 start() {
+  sudo docker build --tag local/ninecontroller /usr/local/ninecontroller
   sudo docker rm -f ninecontroller || true
   sudo docker run --privileged \
       --volume=/var/run/docker.sock:/var/run/docker.sock \
@@ -41,7 +54,7 @@ start() {
       --net=host \
       --pid=host \
       --detach \
-      imos/ninecontroller
+      local/ninecontroller
 }
 
 stop() {
