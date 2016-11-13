@@ -19,6 +19,8 @@ cat <<'EOM' > '/tmp/docker/gcloud/Dockerfile'
 FROM ubuntu:16.04
 MAINTAINER imos
 
+RUN sed -i -e "s%http://archive.ubuntu.com/ubuntu/%http://ap-northeast-1.ec2.archive.ubuntu.com/ubuntu/%g" /etc/apt/sources.list
+
 RUN apt update && apt install --yes curl python
 RUN curl https://sdk.cloud.google.com | \
     CLOUDSDK_INSTALL_DIR=/usr/local CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash
@@ -41,6 +43,8 @@ mkdir -p '/tmp/docker/ninecontroller'
 cat <<'EOM' > /tmp/docker/ninecontroller/Dockerfile
 FROM ubuntu:16.04
 MAINTAINER imos
+
+RUN sed -i -e "s%http://archive.ubuntu.com/ubuntu/%http://ap-northeast-1.ec2.archive.ubuntu.com/ubuntu/%g" /etc/apt/sources.list
 
 # sshd のセットアップ．サーバの指紋を早期に確定するために最初に持ってきている．
 RUN mkdir -p /var/run/sshd
