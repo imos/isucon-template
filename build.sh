@@ -1,5 +1,8 @@
 #!/bin/bash
 # ninecontroller を作成します
+#
+# Usage:
+#   curl -L -o build.sh 'https://git.io/vX6Rn' && bash build.sh
 
 set -e -u
 
