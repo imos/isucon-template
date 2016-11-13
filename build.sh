@@ -27,7 +27,10 @@ EOM
 sudo docker build --tag imos/gcloud /tmp/docker/gcloud
 
 if [ ! -d ~/.config/gcloud ]; then
-  gcloud init
+  sudo docker run \
+      --volume=$HOME/.config/gcloud:/root/.config/gcloud \
+      --volume=$HOME:/host --rm -it imos/gcloud \
+      gcloud init
 fi
 
 ################################################################################
@@ -90,6 +93,6 @@ sudo docker run --privileged \
 sudo docker save imos/ninecontroller | gzip > ~/ninecontroller.tar.gz
 sudo docker run \
   --volume=$HOME/.config/gcloud:/root/.config/gcloud \
-  --volume=$HOME:/host --rm -it gcloud \
+  --volume=$HOME:/host --rm -it imos/gcloud \
   gsutil cp /host/ninecontroller.tar.gz \
       gs://imoz-docker-tokyo/ninecontroller/experimental.tar.gz
