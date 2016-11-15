@@ -43,6 +43,8 @@ fi
 ################################################################################
 
 mkdir -p '/tmp/docker/ninecontroller'
+curl -L -o '/tmp/docker/ninecontroller/docker-compose.yml' \
+    "${TEMPLATE_REPOSITORY}/docker-compose.yml"
 cat <<'EOM' > /tmp/docker/ninecontroller/Dockerfile
 FROM ubuntu:16.04
 MAINTAINER imos
@@ -57,28 +59,42 @@ RUN mkdir -p /var/run/sshd
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100
 
-RUN curl -sSL https://get.docker.com/ | sh
 RUN useradd --home-dir=/home/ninetan --create-home --uid=10001 --user-group \
         --shell=/bin/bash ninetan
 RUN echo 'ninetan ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-
-RUN curl -L -o /root/installer.sh 'https://storage.googleapis.com/imoz-docker-tokyo/bazel/bazel-0.4.0-installer-linux-x86_64.sh' && \
-    bash /root/installer.sh && rm /root/installer.sh
-
-RUN echo '# Bazelrc for GCC' > /etc/bazel.bazelrc
-RUN echo 'build --verbose_failures --copt=-fdiagnostics-color=always --copt=-Wno-cpp --copt=-Wno-unused-local-typedefs --copt=-Wno-sign-compare --copt=-Wno-array-bounds' >> /etc/bazel.bazelrc
-RUN echo 'test --verbose_failures --test_timeout=3600 --test_output=errors' >> /etc/bazel.bazelrc
-
+################################################################################
+# docker のインストールと設定
+################################################################################
+RUN curl -sSL https://get.docker.com/ | sh
 # ※ ホストのDockerのAPIバージョンに合わせて変えること
 # ホストのAPIバージョンは "docker version" で確認可能
 RUN echo 'DOCKER_API_VERSION="1.23"' >> /etc/environment
 
+################################################################################
+# bazel のインストールと設定
+################################################################################
+RUN curl -L -o /root/installer.sh 'https://storage.googleapis.com/imoz-docker-tokyo/bazel/bazel-0.4.0-installer-linux-x86_64.sh' && \
+    bash /root/installer.sh && rm /root/installer.sh
+RUN echo '# Bazelrc for GCC' > /etc/bazel.bazelrc
+RUN echo 'build --verbose_failures --copt=-fdiagnostics-color=always --copt=-Wno-cpp --copt=-Wno-unused-local-typedefs --copt=-Wno-sign-compare --copt=-Wno-array-bounds' >> /etc/bazel.bazelrc
+RUN echo 'test --verbose_failures --test_timeout=3600 --test_output=errors' >> /etc/bazel.bazelrc
+
+################################################################################
+# docker-compose のインストール
+# ※ イメージのダウンロードを行うのでこれ以降にあまり重い処理は置かないこと
+################################################################################
+RUN curl -L "https://storage.googleapis.com/imoz-docker-tokyo/docker-compose/1.8.1-$(uname -s)-$(uname -m)" > /usr/local/bin/docker-compose
+RUN chmod +x /usr/local/bin/docker-compose
+RUN mkdir -p /usr/local/ninecontroller
+ADD ./docker-compose.yml /usr/local/ninecontroller/docker-compose.yml
+RUN cd /usr/local/ninecontroller && docker-compose pull && docker-compose build
+
+################################################################################
+# sshd の設定
+################################################################################
 RUN echo '[program:sshd]' > /etc/supervisor/conf.d/sshd.conf
 RUN echo 'command=/usr/sbin/sshd -D -p 2222' >> /etc/supervisor/conf.d/sshd.conf
-
-RUN echo '[program:nined]' > /etc/supervisor/conf.d/nined.conf
-RUN echo 'command=/home/ninetan/init.sh' >> /etc/supervisor/conf.d/nined.conf
 
 CMD /usr/bin/supervisord --nodaemon
 EOM
