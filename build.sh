@@ -121,7 +121,8 @@ sudo docker run --privileged \
 
 sudo docker save imos/ninecontroller | gzip > ~/ninecontroller.tar.gz
 sudo docker run \
-  --volume=$HOME/.config/gcloud:/root/.config/gcloud \
-  --volume=$HOME:/host --rm -it imos/gcloud \
-  gsutil cp /host/ninecontroller.tar.gz \
-      gs://imoz-docker-tokyo/ninecontroller/experimental.tar.gz
+    --volume=$HOME/.config/gcloud:/root/.config/gcloud \
+    --volume=$HOME:/host --rm -it imos/gcloud \
+    gsutil cp -o GSUtil:parallel_composite_upload_threshold=50M \
+        /host/ninecontroller.tar.gz \
+        gs://imoz-docker-tokyo/ninecontroller/experimental.tar.gz
