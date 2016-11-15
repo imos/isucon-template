@@ -69,9 +69,6 @@ RUN echo 'ninetan ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 # docker のインストールと設定
 ################################################################################
 RUN curl -sSL https://get.docker.com/ | sh
-# ※ ホストのDockerのAPIバージョンに合わせて変えること
-# ホストのAPIバージョンは "docker version" で確認可能
-RUN echo 'DOCKER_API_VERSION="1.23"' >> /etc/environment
 
 ################################################################################
 # bazel のインストールと設定
@@ -84,19 +81,29 @@ RUN echo 'test --verbose_failures --test_timeout=3600 --test_output=errors' >> /
 
 ################################################################################
 # docker-compose のインストール
-# ※ イメージのダウンロードを行うのでこれ以降にあまり重い処理は置かないこと
 ################################################################################
 RUN curl -L "https://storage.googleapis.com/imoz-docker-tokyo/docker-compose/1.8.1-$(uname -s)-$(uname -m)" > /usr/local/bin/docker-compose
 RUN chmod +x /usr/local/bin/docker-compose
 RUN mkdir -p /usr/local/ninecontroller
-ADD ./docker-compose.yml /usr/local/ninecontroller/docker-compose.yml
-RUN cd /usr/local/ninecontroller && docker-compose pull && docker-compose build
+
+################################################################################
+# imos-bin のインストール
+################################################################################
+RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin'
 
 ################################################################################
 # sshd の設定
 ################################################################################
 RUN echo '[program:sshd]' > /etc/supervisor/conf.d/sshd.conf
 RUN echo 'command=/usr/sbin/sshd -D -p 2222' >> /etc/supervisor/conf.d/sshd.conf
+
+################################################################################
+# 環境変数の設定
+################################################################################
+RUN echo 'PATH="/usr/imos/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"' > /etc/environment
+# ※ ホストのDockerのAPIバージョンに合わせて変えること
+# ホストのAPIバージョンは "docker version" で確認可能
+RUN echo 'DOCKER_API_VERSION="1.23"' >> /etc/environment
 
 CMD /usr/bin/supervisord --nodaemon
 EOM
