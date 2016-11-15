@@ -45,8 +45,7 @@ fi
 ################################################################################
 
 mkdir -p '/tmp/docker/ninecontroller'
-curl -L -o '/tmp/docker/ninecontroller/docker-compose.yml' \
-    "${TEMPLATE_REPOSITORY}/docker-compose.yml"
+date +%s > '/tmp/docker/ninecontroller/TIMESTAMP'
 cat <<'EOM' > /tmp/docker/ninecontroller/Dockerfile
 FROM ubuntu:16.04
 MAINTAINER imos
@@ -87,6 +86,11 @@ RUN chmod +x /usr/local/bin/docker-compose
 RUN mkdir -p /usr/local/ninecontroller
 
 ################################################################################
+# タイムスタンプファイルのコピー（これ以降は毎度実行される）
+################################################################################
+ADD ./TIMESTAMP /TIMESTAMP
+
+################################################################################
 # imos-bin のインストール
 ################################################################################
 RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin'
@@ -123,6 +127,6 @@ sudo docker save imos/ninecontroller | gzip > ~/ninecontroller.tar.gz
 sudo docker run \
     --volume=$HOME/.config/gcloud:/root/.config/gcloud \
     --volume=$HOME:/host --rm -it imos/gcloud \
-    gsutil cp -o GSUtil:parallel_composite_upload_threshold=50M \
+    gsutil -o GSUtil:parallel_composite_upload_threshold=50M cp \
         /host/ninecontroller.tar.gz \
         gs://imoz-docker-tokyo/ninecontroller/experimental.tar.gz
