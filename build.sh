@@ -10,7 +10,7 @@ set -e -u
 # 1. 基本環境のセットアップ
 ################################################################################
 
-curl "${TEMPLATE_REPOSITORY:-"https://raw.githubusercontent.com/imos/isucon-template/${TEMPLATE_BRANCH:-"master"}/base.sh"}" | bash
+curl "${TEMPLATE_REPOSITORY:="https://raw.githubusercontent.com/imos/isucon-template/${TEMPLATE_BRANCH:="master"}/base.sh"}" | bash
 # エディタのカラーリング調整用 → "
 
 ################################################################################
