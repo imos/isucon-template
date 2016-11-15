@@ -107,7 +107,7 @@ ADD ./TIMESTAMP /TIMESTAMP
 ################################################################################
 # imos-bin のインストール
 ################################################################################
-RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin' &&
+RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin' && \
     echo 'source /usr/imos/bin/imos-bashrc' >> /etc/bashrc
 
 CMD /usr/bin/supervisord --nodaemon
