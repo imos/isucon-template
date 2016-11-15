@@ -33,6 +33,10 @@ fi
 echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCrHaL3kdZ2RekCdpkie3fsiv2yVyyWRBOO6Q68Kr+tFStRqtF8q1/UoeteUIOxzwKaAmHoaM9PkItdMBki0BLQDimCZwjjbkosritGDMTJXGd21O72mWaTv+nfq+/ishCdt6gdBYXTejvpPJhq8ZMYhTYJZkWqlGO2CKrWcnHHu1HhnValeqNWS5nh8BULOTMKaixjdzXIkWgm8HyiewvqjZXC3tZlfFDErRpiS7SYfJHd4PujjFCNyiVxZ5yOvEGMXQa1UFxQlfX8H+lAr6qObK50osAdUbvjjbhIhMvZT2higSNNtv/yiaLRnLbbOHomObvqxob5TUVdCkazXX3N imos@Moltres' > .ssh/imos.pub
 cat .ssh/*.pub > .ssh/authorized_keys
 chmod 600 .ssh/authorized_keys
+
+echo 'Host *' > .ssh/config
+echo '  UserKnownHostsFile /dev/null' >> .ssh/config
+echo '  StrictHostKeyChecking no' >> .ssh/config
 EOM
 # ninetan が sudo を実行できるようにする
 if ! sudo grep ninetan /etc/sudoers; then
