@@ -86,20 +86,10 @@ RUN chmod +x /usr/local/bin/docker-compose
 RUN mkdir -p /usr/local/ninecontroller
 
 ################################################################################
-# タイムスタンプファイルのコピー（これ以降は毎度実行される）
-################################################################################
-ADD ./TIMESTAMP /TIMESTAMP
-
-################################################################################
-# imos-bin のインストール
-################################################################################
-RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin'
-
-################################################################################
 # sshd の設定
 ################################################################################
-RUN echo '[program:sshd]' > /etc/supervisor/conf.d/sshd.conf
-RUN echo 'command=/usr/sbin/sshd -D -p 2222' >> /etc/supervisor/conf.d/sshd.conf
+RUN echo '[program:sshd]' > /etc/supervisor/conf.d/sshd.conf && \
+    echo 'command=/usr/sbin/sshd -D -p 2222' >> /etc/supervisor/conf.d/sshd.conf
 
 ################################################################################
 # 環境変数の設定
@@ -108,6 +98,17 @@ RUN echo 'PATH="/usr/imos/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 # ※ ホストのDockerのAPIバージョンに合わせて変えること
 # ホストのAPIバージョンは "docker version" で確認可能
 RUN echo 'DOCKER_API_VERSION="1.23"' >> /etc/environment
+
+################################################################################
+# タイムスタンプファイルのコピー（これ以降は毎度実行される）
+################################################################################
+ADD ./TIMESTAMP /TIMESTAMP
+
+################################################################################
+# imos-bin のインストール
+################################################################################
+RUN git clone --depth 1 'https://github.com/imos/bin' '/usr/imos/bin' &&
+    echo 'source /usr/imos/bin/imos-bashrc' >> /etc/bashrc
 
 CMD /usr/bin/supervisord --nodaemon
 EOM
@@ -122,6 +123,12 @@ sudo docker run --privileged \
     --pid=host \
     --detach \
     imos/ninecontroller
+
+read -p "Do you want to upload the image as experimental? [Y/n] " yesno
+case "${yesno}" in
+  [Yy]*) ;;
+  *) exit 0;;
+esac
 
 sudo docker save imos/ninecontroller | gzip > ~/ninecontroller.tar.gz
 sudo docker run \
