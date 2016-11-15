@@ -10,8 +10,10 @@ set -e -u
 # 1. 基本環境のセットアップ
 ################################################################################
 
-curl "${TEMPLATE_REPOSITORY:="https://raw.githubusercontent.com/imos/isucon-template/${TEMPLATE_BRANCH:="master"}/base.sh"}" | bash
+: "${TEMPLATE_REPOSITORY:="https://raw.githubusercontent.com/imos/isucon-template/${TEMPLATE_BRANCH:="master"}"}"
 # エディタのカラーリング調整用 → "
+
+curl "${TEMPLATE_REPOSITORY}/base.sh" | bash
 
 ################################################################################
 # 2. gcloud の設定
